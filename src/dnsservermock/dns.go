@@ -5,19 +5,26 @@ import (
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/sternisaea/dnsservermock/src/dnsstorage"
+	"github.com/sternisaea/dnsservermock/src/dnstypes"
 )
 
 type DNSServer struct {
 	conn *net.UDPConn
 	ip   net.IP
 	port int
+
+	storage dnsstorage.Storage
 }
 
-func NewDnsServer(ip net.IP, port int) *DNSServer {
+func NewDnsServer(ip net.IP, port int, storage dnsstorage.Storage) *DNSServer {
 	return &DNSServer{
 		conn: nil,
 		ip:   ip,
 		port: port,
+
+		storage: storage,
 	}
 }
 
@@ -67,7 +74,7 @@ func (ds *DNSServer) Stop() error {
 func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 	req := &DNSRequest{}
 	if err := req.ProcessRequestBuffer(buf, n); err != nil {
-		ds.sendErrorResponse(req, clientAddr, RcodeFormErr, err)
+		ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeFormErr, err)
 		return
 	}
 
@@ -76,19 +83,19 @@ func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 	resp := &DNSResponse{}
 	resp.CopyHeaderAndQuestions(req)
 	for _, q := range req.Questions {
-		proc, err := GetProcess(DnsType(q.Type))
+		proc, err := GetProcess(dnstypes.DnsType(q.Type))
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrNotSupportedType):
-				ds.sendErrorResponse(req, clientAddr, RcodeNotImp, err)
+				ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeNotImp, err)
 			case errors.Is(err, ErrUnknownType):
-				ds.sendErrorResponse(req, clientAddr, RcodeFormErr, err)
+				ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeFormErr, err)
 			default:
-				ds.sendErrorResponse(req, clientAddr, RcodeServFail, err)
+				ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeServFail, err)
 			}
 			return
 		}
-		proc.Process(req, resp, q)
+		proc.Process(req, resp, q, (*ds).storage)
 	}
 
 	if err := ds.sendResponse(resp, clientAddr); err != nil {
@@ -98,7 +105,7 @@ func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 	log.Printf("DNS Response have been sent (ID: %04X)", resp.ID)
 }
 
-func (ds *DNSServer) sendErrorResponse(req *DNSRequest, clientAddr *net.UDPAddr, rcode Rcode, err error) {
+func (ds *DNSServer) sendErrorResponse(req *DNSRequest, clientAddr *net.UDPAddr, rcode dnstypes.Rcode, err error) {
 	log.Printf("DNS error (ID: %04X): %s", req.ID, err)
 
 	resp := &DNSResponse{}

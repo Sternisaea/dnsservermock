@@ -1,16 +1,18 @@
 package dnsservermock
 
+import "github.com/sternisaea/dnsservermock/src/dnstypes"
+
 type DNSFlags struct {
-	QR     bool  // false = query, true = response
-	Opcode uint8 // Kind of query (4-bits)
-	AA     bool  // Authoritative Answer
-	TC     bool  // Truncation
-	RD     bool  // Recursion Desired
-	RA     bool  // Recursion Available
-	Z      bool  // Not used
-	AD     bool  // Authentic Data
-	CD     bool  // Checking Disabled
-	RCODE  Rcode // Reponse Code (4-bits)
+	QR     bool           // false = query, true = response
+	Opcode uint8          // Kind of query (4-bits)
+	AA     bool           // Authoritative Answer
+	TC     bool           // Truncation
+	RD     bool           // Recursion Desired
+	RA     bool           // Recursion Available
+	Z      bool           // Not used
+	AD     bool           // Authentic Data
+	CD     bool           // Checking Disabled
+	RCODE  dnstypes.Rcode // Reponse Code (4-bits)
 }
 
 func (df *DNSFlags) Set(flags uint16) {
@@ -23,7 +25,7 @@ func (df *DNSFlags) Set(flags uint16) {
 	df.Z = (flags & 0x0040) != 0
 	df.AD = (flags & 0x0020) != 0
 	df.CD = (flags & 0x0010) != 0
-	df.RCODE = Rcode(flags & 0x000F)
+	df.RCODE = dnstypes.Rcode(flags & 0x000F)
 }
 
 func (df *DNSFlags) Get() uint16 {

@@ -1,4 +1,4 @@
-package dnsservermock
+package dnstypes
 
 type DnsType uint16
 
