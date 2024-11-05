@@ -1,7 +1,7 @@
 package dnsservermock
 
 import (
-	"fmt"
+	"net"
 
 	"github.com/sternisaea/dnsservermock/src/dnsstorage"
 	"github.com/sternisaea/dnsservermock/src/dnstypes"
@@ -17,6 +17,20 @@ func (t *TypeA) Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, sto
 		return
 	}
 
-	// Create Answer for qst.Name with result
-	fmt.Printf("RESULT: %s\n", result)
+	ip4 := net.ParseIP(result).To4()
+	if ip4 == nil || len(ip4) != 4 {
+		(*resp).Flags.RCODE = dnstypes.RcodeServFail
+		return
+	}
+
+	answer := DNSAnswer{
+		Name:     qst.Name,
+		Type:     qst.Type,
+		Class:    qst.Class,
+		TTL:      3600,
+		RDLength: uint16(len(ip4)),
+		RData:    ip4,
+	}
+
+	(*resp).Answers = append((*resp).Answers, answer)
 }

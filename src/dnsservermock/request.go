@@ -11,15 +11,15 @@ var (
 )
 
 type DNSRequest struct {
-	ID          uint16
-	Flags       DNSFlags
-	QDCount     uint16
-	ANCount     uint16
-	NSCount     uint16
-	ARCount     uint16
-	Questions   []DNSQuestion
-	Authorities []DNSResourceRecord
-	Additionals []DNSResourceRecord
+	ID        uint16
+	Flags     DNSFlags
+	QDCount   uint16
+	ANCount   uint16
+	NSCount   uint16
+	ARCount   uint16
+	Questions []DNSQuestion
+	// Authorities []DNSResourceRecord
+	// Additionals []DNSResourceRecord
 }
 
 type DNSQuestion struct {

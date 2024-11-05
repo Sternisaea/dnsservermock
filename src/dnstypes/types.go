@@ -23,7 +23,7 @@ const (
 	Type_AAAA   DnsType = 28 // RFC 3596
 	Type_SRV    DnsType = 33 // RFC 2782
 	Type_NAPTR  DnsType = 35 // RFC 2915
-	Type_OPT    DnsType = 41 // RFC 2671
+	Type_OPT    DnsType = 41 // RFC 6891 (RFC 2671)
 	Type_DS     DnsType = 43 // RFC 4034
 	Type_RRSIG  DnsType = 46 // RFC 4034
 	Type_NSEC   DnsType = 47 // RFC 4034

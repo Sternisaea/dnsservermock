@@ -38,3 +38,7 @@ RFC 2870	Root Name Server Operational Requirements
 RFC 4343	Domain Name System (DNS) Case Insensitivity Clarification
 RFC 6303	Locally Served DNS Zones
 RFC 6781	DNSSEC Operational Practices, Version 2
+
+### 
+RFC 7873    Domain Name System (DNS) Cookies
+RFC 9018    Interoperable Domain Name System (DNS) Server Cookies

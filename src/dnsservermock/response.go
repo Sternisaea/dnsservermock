@@ -14,9 +14,18 @@ type DNSResponse struct {
 	NSCount     uint16
 	ARCount     uint16
 	Questions   []DNSQuestion
-	Answers     []DNSResourceRecord
+	Answers     []DNSAnswer
 	Authorities []DNSResourceRecord
 	Additionals []DNSResourceRecord
+}
+
+type DNSAnswer struct {
+	Name     string
+	Type     uint16
+	Class    uint16
+	TTL      uint32
+	RDLength uint16
+	RData    []byte
 }
 
 func (resp *DNSResponse) CopyHeaderAndQuestions(req *DNSRequest) {
@@ -42,30 +51,31 @@ func (resp *DNSResponse) SerializeResponse() []byte {
 
 	// Write questions
 	for _, q := range resp.Questions {
-		writeDomainName(&buf, q.Name)
+		resp.writeDomainName(&buf, q.Name)
 		binary.Write(&buf, binary.BigEndian, q.Type)
 		binary.Write(&buf, binary.BigEndian, q.Class)
 	}
 
 	// Write answers
-	for _, rr := range resp.Answers {
-		writeResourceRecord(&buf, rr)
+	for _, ar := range resp.Answers {
+		resp.writeAnswerRecord(&buf, ar)
 	}
 
-	// Write authority records
-	for _, rr := range resp.Authorities {
-		writeResourceRecord(&buf, rr)
-	}
+	// // Write authority records
+	// for _, rr := range resp.Authorities {
+	// 	writeResourceRecord(&buf, rr)
+	// }
 
-	// Write additional records
-	for _, rr := range resp.Additionals {
-		writeResourceRecord(&buf, rr)
-	}
+	// // Write additional records
+	// for _, rr := range resp.Additionals {
+	// 	writeResourceRecord(&buf, rr)
+	// }
 
 	return buf.Bytes()
 }
 
-func writeDomainName(buf *bytes.Buffer, name string) {
+func (resp *DNSResponse) writeDomainName(buf *bytes.Buffer, name string) {
+	// store previous written domain names
 	parts := strings.Split(name, ".")
 	for _, part := range parts {
 		buf.WriteByte(byte(len(part)))
@@ -74,8 +84,17 @@ func writeDomainName(buf *bytes.Buffer, name string) {
 	buf.WriteByte(0) // End of domain name
 }
 
-func writeResourceRecord(buf *bytes.Buffer, rr DNSResourceRecord) {
-	writeDomainName(buf, rr.Name)
+func (resp *DNSResponse) writeAnswerRecord(buf *bytes.Buffer, ar DNSAnswer) {
+	resp.writeDomainName(buf, ar.Name)
+	binary.Write(buf, binary.BigEndian, ar.Type)
+	binary.Write(buf, binary.BigEndian, ar.Class)
+	binary.Write(buf, binary.BigEndian, ar.TTL)
+	binary.Write(buf, binary.BigEndian, uint16(len(ar.RData)))
+	buf.Write(ar.RData)
+}
+
+func (resp *DNSResponse) writeResourceRecord(buf *bytes.Buffer, rr DNSResourceRecord) {
+	resp.writeDomainName(buf, rr.Name)
 	binary.Write(buf, binary.BigEndian, rr.Type)
 	binary.Write(buf, binary.BigEndian, rr.Class)
 	binary.Write(buf, binary.BigEndian, rr.TTL)
