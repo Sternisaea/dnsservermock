@@ -78,9 +78,7 @@ func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 		return
 	}
 
-	fmt.Printf("%#v\n", req) // TEST
-
-	resp := &DNSResponse{}
+	resp := NewDnsResponse()
 	resp.CopyHeaderAndQuestions(req)
 	for _, q := range req.Questions {
 		proc, err := GetProcess(dnstypes.DnsType(q.Type))
@@ -119,9 +117,36 @@ func (ds *DNSServer) sendErrorResponse(req *DNSRequest, clientAddr *net.UDPAddr,
 
 func (ds *DNSServer) sendResponse(resp *DNSResponse, clientAddr *net.UDPAddr) error {
 	respBuf := resp.SerializeResponse()
+
+	printbuffer(respBuf)
+
 	_, err := ds.conn.WriteToUDP(respBuf, clientAddr)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func printbuffer(buf []byte) {
+	fmt.Println("Buffer:")
+	chrs := ""
+	for i, b := range buf {
+		if i != 0 && i%16 == 0 {
+			if len(chrs) != 0 {
+				fmt.Printf("%s", chrs)
+			}
+			fmt.Println()
+			chrs = ""
+		}
+
+		// if (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b == '-' {
+		if b >= ' ' && b <= '~' {
+			chrs += string(b)
+		} else {
+			chrs += "."
+		}
+
+		fmt.Printf("%02x ", b)
+	}
+	fmt.Println()
 }

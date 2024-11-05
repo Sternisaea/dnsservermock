@@ -17,6 +17,8 @@ type DNSResponse struct {
 	Answers     []DNSAnswer
 	Authorities []DNSResourceRecord
 	Additionals []DNSResourceRecord
+
+	domainBuffer bufferDomains
 }
 
 type DNSAnswer struct {
@@ -28,14 +30,21 @@ type DNSAnswer struct {
 	RData    []byte
 }
 
+type bufferDomains map[string]int
+
+func NewDnsResponse() *DNSResponse {
+	return &DNSResponse{
+		domainBuffer: make(map[string]int),
+	}
+}
+
 func (resp *DNSResponse) CopyHeaderAndQuestions(req *DNSRequest) {
 	(*resp).ID = (*req).ID
 	(*resp).Flags = (*req).Flags
 	(*resp).Flags.QR = true
 	(*resp).Flags.RA = false
 	(*resp).QDCount = (*req).QDCount
-	(*resp).Questions = make([]DNSQuestion, 0, len((*req).Questions))
-	copy((*resp).Questions, (*req).Questions)
+	(*resp).Questions = append((*resp).Questions, (*req).Questions...)
 }
 
 func (resp *DNSResponse) SerializeResponse() []byte {
@@ -75,11 +84,17 @@ func (resp *DNSResponse) SerializeResponse() []byte {
 }
 
 func (resp *DNSResponse) writeDomainName(buf *bytes.Buffer, name string) {
-	// store previous written domain names
 	parts := strings.Split(name, ".")
-	for _, part := range parts {
-		buf.WriteByte(byte(len(part)))
-		buf.WriteString(part)
+	for i, part := range parts {
+		dm := strings.Join(parts[i:], ".")
+		if pos, ok := (*resp).domainBuffer[dm]; ok {
+			binary.Write(buf, binary.BigEndian, uint16(pos)|0xC000)
+			return
+		} else {
+			(*resp).domainBuffer[dm] = buf.Len()
+			buf.WriteByte(byte(len(part)))
+			buf.WriteString(part)
+		}
 	}
 	buf.WriteByte(0) // End of domain name
 }
