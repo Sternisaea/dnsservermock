@@ -6,29 +6,26 @@ import (
 	"log"
 	"net"
 
-	"github.com/sternisaea/dnsservermock/src/dnsconst"
 	"github.com/sternisaea/dnsservermock/src/dnsstorage"
 )
 
-type DNSServer struct {
-	conn *net.UDPConn
-	ip   net.IP
-	port int
-
+type DnsServer struct {
+	conn    *net.UDPConn
+	ip      net.IP
+	port    int
 	storage dnsstorage.Storage
 }
 
-func NewDnsServer(ip net.IP, port int, storage dnsstorage.Storage) *DNSServer {
-	return &DNSServer{
-		conn: nil,
-		ip:   ip,
-		port: port,
-
+func NewDnsServer(ip net.IP, port int, storage dnsstorage.Storage) *DnsServer {
+	return &DnsServer{
+		ip:      ip,
+		port:    port,
+		conn:    nil,
 		storage: storage,
 	}
 }
 
-func (ds *DNSServer) Start() error {
+func (ds *DnsServer) Start() error {
 	addr := net.UDPAddr{
 		Port: (*ds).port,
 		IP:   (*ds).ip,
@@ -60,7 +57,7 @@ func (ds *DNSServer) Start() error {
 	return nil
 }
 
-func (ds *DNSServer) Stop() error {
+func (ds *DnsServer) Stop() error {
 	if (*ds).conn != nil {
 		if err := (*ds).conn.Close(); err != nil {
 			log.Printf("Error while stopping DNS server: %s", err)
@@ -71,58 +68,28 @@ func (ds *DNSServer) Stop() error {
 	return nil
 }
 
-func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
-	req := &DnsRequest{}
-	if err := req.ProcessRequestBuffer(buf, n); err != nil {
-		ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeFormErr, err)
-		return
+func (ds *DnsServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
+	dh := NewDnsHandling()
+	if err := (*ds).processRequest(dh, buf, n); err != nil {
+		log.Println(err)
 	}
 
-	resp := NewDnsResponse()
-	resp.CopyHeaderAndQuestions(req)
-	for _, q := range req.Questions {
-		proc, err := GetProcess(dnsconst.DnsType(q.Type))
-		if err != nil {
-			switch {
-			case errors.Is(err, ErrNotSupportedType):
-				ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeNotImp, err)
-			case errors.Is(err, ErrUnknownType):
-				ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeFormErr, err)
-			default:
-				ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeServFail, err)
-			}
-			return
-		}
-		proc.Process(req, resp, q, (*ds).storage)
-	}
-
-	if err := ds.sendResponse(resp, clientAddr); err != nil {
-		log.Printf("Error sending DNS Response (ID: %04X): %s", resp.ID, err)
-		return
-	}
-	log.Printf("DNS Response have been sent (ID: %04X)", resp.ID)
-}
-
-func (ds *DNSServer) sendErrorResponse(req *DnsRequest, clientAddr *net.UDPAddr, rcode dnsconst.Rcode, err error) {
-	log.Printf("DNS error (ID: %04X): %s", req.ID, err)
-
-	resp := &DNSResponse{}
-	resp.CopyHeaderAndQuestions(req)
-	resp.Flags.RCODE = rcode
-	if err := (*ds).sendResponse(resp, clientAddr); err != nil {
-		log.Printf("Error sending DNS response error (ID: %04X): %s", resp.ID, err)
-		return
-	}
-}
-
-func (ds *DNSServer) sendResponse(resp *DNSResponse, clientAddr *net.UDPAddr) error {
-	respBuf := resp.SerializeResponse()
-
-	printbuffer(respBuf)
-
-	_, err := ds.conn.WriteToUDP(respBuf, clientAddr)
+	_, err := ds.conn.WriteToUDP((*dh).GetOutput(), clientAddr)
 	if err != nil {
-		return err
+		log.Printf("Error sending DNS response (ID: %04x): %s", (*dh).ID, err)
+	}
+	log.Printf("DNS response was succesfully sent (ID: %04x)", (*dh).ID)
+}
+
+func (ds *DnsServer) processRequest(dh *DnsHandling, buf []byte, n int) error {
+	if err := dh.ReadingQuery(buf, n); err != nil {
+		return fmt.Errorf("error reading DNS response (ID: %04x): %s", (*dh).ID, err)
+	}
+	if err := dh.CreateResponse(); err != nil {
+		return fmt.Errorf("error creating DNS response (ID: %04x): %s", (*dh).ID, err)
+	}
+	if err := dh.ExecuteQueries((*ds).storage); err != nil {
+		return fmt.Errorf("error querying DNS response (ID: %04x): %s", (*dh).ID, err)
 	}
 	return nil
 }

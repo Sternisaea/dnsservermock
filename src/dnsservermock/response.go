@@ -3,54 +3,37 @@ package dnsservermock
 import (
 	"bytes"
 	"encoding/binary"
-	"strings"
 )
 
-type DNSResponse struct {
-	ID          uint16
-	Flags       DnsFlags
-	QDCount     uint16
-	ANCount     uint16
-	NSCount     uint16
-	ARCount     uint16
+type DnsResponse struct {
+	ID    uint16
+	Flags DnsFlags
+	// QDCount   uint16
+	// ANCount   uint16
+	// NSCount   uint16
+	// ARCount   uint16
 	Questions   []DnsQuestion
-	Answers     []DnsAnswer
+	Answers     []DnsResource
 	Authorities []DnsResourceRecord
 	Additionals []DnsResourceRecord
-
-	domainBuffer bufferDomains
 }
 
-type DnsAnswer struct {
-	Name     string
-	Type     uint16
-	Class    uint16
-	TTL      uint32
-	RDLength uint16
-	RData    []byte
-}
+type domains map[string]int
 
-type bufferDomains map[string]int
-
-func NewDnsResponse() *DNSResponse {
-	return &DNSResponse{
-		domainBuffer: make(map[string]int),
+func NewDnsResponse(id uint16) *DnsResponse {
+	return &DnsResponse{
+		ID: id,
+		Flags: DnsFlags{
+			QR: true,
+		},
 	}
 }
 
-func (resp *DNSResponse) CopyHeaderAndQuestions(req *DnsRequest) {
-	(*resp).ID = (*req).ID
-	(*resp).Flags = (*req).Flags
-	(*resp).Flags.QR = true
-	(*resp).Flags.RA = false
-	(*resp).QDCount = (*req).QDCount
-	(*resp).Questions = append((*resp).Questions, (*req).Questions...)
-}
+func (resp *DnsResponse) Write() []byte {
+	dms := make(domains, len(resp.Answers))
 
-func (resp *DNSResponse) SerializeResponse() []byte {
 	var buf bytes.Buffer
 
-	// Write DNS header
 	binary.Write(&buf, binary.BigEndian, resp.ID)
 	binary.Write(&buf, binary.BigEndian, (*resp).Flags.Get())
 	binary.Write(&buf, binary.BigEndian, uint16(len(resp.Questions)))
@@ -60,22 +43,22 @@ func (resp *DNSResponse) SerializeResponse() []byte {
 
 	// Write questions
 	for _, q := range resp.Questions {
-		resp.writeDomainName(&buf, q.Name)
+		writeDomainName(&buf, &dms, q.Name)
 		binary.Write(&buf, binary.BigEndian, q.Type)
 		binary.Write(&buf, binary.BigEndian, q.Class)
 	}
 
 	// Write answers
-	for _, ar := range resp.Answers {
-		resp.writeAnswerRecord(&buf, ar)
+	for _, a := range resp.Answers {
+		a.Write(&buf, &dms)
 	}
 
-	// // Write authority records
+	// Write authority records
 	// for _, rr := range resp.Authorities {
 	// 	writeResourceRecord(&buf, rr)
 	// }
 
-	// // Write additional records
+	// Write additional records
 	// for _, rr := range resp.Additionals {
 	// 	writeResourceRecord(&buf, rr)
 	// }
@@ -83,36 +66,11 @@ func (resp *DNSResponse) SerializeResponse() []byte {
 	return buf.Bytes()
 }
 
-func (resp *DNSResponse) writeDomainName(buf *bytes.Buffer, name string) {
-	parts := strings.Split(name, ".")
-	for i, part := range parts {
-		dm := strings.Join(parts[i:], ".")
-		if pos, ok := (*resp).domainBuffer[dm]; ok {
-			binary.Write(buf, binary.BigEndian, uint16(pos)|0xC000)
-			return
-		} else {
-			(*resp).domainBuffer[dm] = buf.Len()
-			buf.WriteByte(byte(len(part)))
-			buf.WriteString(part)
-		}
-	}
-	buf.WriteByte(0) // End of domain name
-}
-
-func (resp *DNSResponse) writeAnswerRecord(buf *bytes.Buffer, ar DnsAnswer) {
-	resp.writeDomainName(buf, ar.Name)
-	binary.Write(buf, binary.BigEndian, ar.Type)
-	binary.Write(buf, binary.BigEndian, ar.Class)
-	binary.Write(buf, binary.BigEndian, ar.TTL)
-	binary.Write(buf, binary.BigEndian, uint16(len(ar.RData)))
-	buf.Write(ar.RData)
-}
-
-func (resp *DNSResponse) writeResourceRecord(buf *bytes.Buffer, rr DnsResourceRecord) {
-	resp.writeDomainName(buf, rr.Name)
-	binary.Write(buf, binary.BigEndian, rr.Type)
-	binary.Write(buf, binary.BigEndian, rr.Class)
-	binary.Write(buf, binary.BigEndian, rr.TTL)
-	binary.Write(buf, binary.BigEndian, uint16(len(rr.RData)))
-	buf.Write(rr.RData)
-}
+// func (resp *DNSResponse) CopyHeaderAndQuestions(req *DnsQuery) {
+// 	(*resp).ID = (*req).ID
+// 	(*resp).Flags = (*req).Flags
+// 	(*resp).Flags.QR = true
+// 	(*resp).Flags.RA = false
+// 	(*resp).QDCount = (*req).QDCount
+// 	(*resp).Questions = append((*resp).Questions, (*req).Questions...)
+// }

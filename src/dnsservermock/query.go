@@ -11,15 +11,15 @@ var (
 )
 
 type DnsQuery struct {
-	ID        uint16
-	Flags     DnsFlags
-	QDCount   uint16
-	ANCount   uint16
-	NSCount   uint16
-	ARCount   uint16
-	Questions []DnsQuestion
-	// Authorities []DnsResourceRecord
-	// Additionals []DnsResourceRecord
+	ID          uint16
+	Flags       DnsFlags
+	QDCount     uint16
+	ANCount     uint16
+	NSCount     uint16
+	ARCount     uint16
+	Questions   []DnsQuestion
+	Authorities []DnsResourceRecord
+	Additionals []DnsResourceRecord
 }
 
 type DnsQuestion struct {
@@ -42,12 +42,12 @@ func (d *DnsQuery) ProcessRequestBuffer(buf []byte, length int) error {
 		return fmt.Errorf("dns request: %w", ErrBufferTooShort)
 	}
 
-	d.ID = binary.BigEndian.Uint16(buf[0:2])
-	d.Flags.Set(binary.BigEndian.Uint16(buf[2:4]))
-	d.QDCount = binary.BigEndian.Uint16(buf[4:6])
-	d.ANCount = binary.BigEndian.Uint16(buf[6:8])
-	d.NSCount = binary.BigEndian.Uint16(buf[8:10])
-	d.ARCount = binary.BigEndian.Uint16(buf[10:12])
+	(*d).ID = binary.BigEndian.Uint16(buf[0:2])
+	(*d).Flags.Set(binary.BigEndian.Uint16(buf[2:4]))
+	(*d).QDCount = binary.BigEndian.Uint16(buf[4:6])
+	(*d).ANCount = binary.BigEndian.Uint16(buf[6:8])
+	(*d).NSCount = binary.BigEndian.Uint16(buf[8:10])
+	(*d).ARCount = binary.BigEndian.Uint16(buf[10:12])
 
 	offset := 12
 	for i := 0; i < int(d.QDCount); i++ {
@@ -55,10 +55,9 @@ func (d *DnsQuery) ProcessRequestBuffer(buf []byte, length int) error {
 		if err != nil {
 			return fmt.Errorf("dns request: %w", err)
 		}
-		d.Questions = append(d.Questions, question)
+		(*d).Questions = append((*d).Questions, question)
 		offset = newOffset
 	}
-
 	return nil
 }
 
