@@ -14,7 +14,7 @@ var (
 )
 
 type TypeProcess interface {
-	Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, store dnsstorage.Storage)
+	Process(req *DnsRequest, resp *DNSResponse, qst DnsQuestion, store dnsstorage.Storage)
 }
 
 func GetProcess(dnsType dnsconst.DnsType) (TypeProcess, error) {

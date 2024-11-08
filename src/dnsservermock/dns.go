@@ -72,7 +72,7 @@ func (ds *DNSServer) Stop() error {
 }
 
 func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
-	req := &DNSRequest{}
+	req := &DnsRequest{}
 	if err := req.ProcessRequestBuffer(buf, n); err != nil {
 		ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeFormErr, err)
 		return
@@ -103,7 +103,7 @@ func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 	log.Printf("DNS Response have been sent (ID: %04X)", resp.ID)
 }
 
-func (ds *DNSServer) sendErrorResponse(req *DNSRequest, clientAddr *net.UDPAddr, rcode dnsconst.Rcode, err error) {
+func (ds *DNSServer) sendErrorResponse(req *DnsRequest, clientAddr *net.UDPAddr, rcode dnsconst.Rcode, err error) {
 	log.Printf("DNS error (ID: %04X): %s", req.ID, err)
 
 	resp := &DNSResponse{}

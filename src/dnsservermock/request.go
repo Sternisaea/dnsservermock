@@ -10,25 +10,25 @@ var (
 	ErrBufferTooShort = fmt.Errorf("buffer too short")
 )
 
-type DNSRequest struct {
+type DnsRequest struct {
 	ID        uint16
-	Flags     DNSFlags
+	Flags     DnsFlags
 	QDCount   uint16
 	ANCount   uint16
 	NSCount   uint16
 	ARCount   uint16
-	Questions []DNSQuestion
-	// Authorities []DNSResourceRecord
-	// Additionals []DNSResourceRecord
+	Questions []DnsQuestion
+	// Authorities []DnsResourceRecord
+	// Additionals []DnsResourceRecord
 }
 
-type DNSQuestion struct {
+type DnsQuestion struct {
 	Name  string
 	Type  uint16
 	Class uint16
 }
 
-type DNSResourceRecord struct {
+type DnsResourceRecord struct {
 	Name     string
 	Type     uint16
 	Class    uint16
@@ -37,7 +37,7 @@ type DNSResourceRecord struct {
 	RData    []byte
 }
 
-func (d *DNSRequest) ProcessRequestBuffer(buf []byte, length int) error {
+func (d *DnsRequest) ProcessRequestBuffer(buf []byte, length int) error {
 	if length < 12 {
 		return fmt.Errorf("dns request: %w", ErrBufferTooShort)
 	}
@@ -62,8 +62,8 @@ func (d *DNSRequest) ProcessRequestBuffer(buf []byte, length int) error {
 	return nil
 }
 
-func parseDNSQuestion(buf []byte, offset int) (DNSQuestion, int, error) {
-	var question DNSQuestion
+func parseDNSQuestion(buf []byte, offset int) (DnsQuestion, int, error) {
+	var question DnsQuestion
 	name, newOffset, err := parseDNSName(buf, offset)
 	if err != nil {
 		return question, offset, fmt.Errorf("question: %w", err)

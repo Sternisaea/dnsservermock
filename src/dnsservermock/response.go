@@ -8,20 +8,20 @@ import (
 
 type DNSResponse struct {
 	ID          uint16
-	Flags       DNSFlags
+	Flags       DnsFlags
 	QDCount     uint16
 	ANCount     uint16
 	NSCount     uint16
 	ARCount     uint16
-	Questions   []DNSQuestion
-	Answers     []DNSAnswer
-	Authorities []DNSResourceRecord
-	Additionals []DNSResourceRecord
+	Questions   []DnsQuestion
+	Answers     []DnsAnswer
+	Authorities []DnsResourceRecord
+	Additionals []DnsResourceRecord
 
 	domainBuffer bufferDomains
 }
 
-type DNSAnswer struct {
+type DnsAnswer struct {
 	Name     string
 	Type     uint16
 	Class    uint16
@@ -38,7 +38,7 @@ func NewDnsResponse() *DNSResponse {
 	}
 }
 
-func (resp *DNSResponse) CopyHeaderAndQuestions(req *DNSRequest) {
+func (resp *DNSResponse) CopyHeaderAndQuestions(req *DnsRequest) {
 	(*resp).ID = (*req).ID
 	(*resp).Flags = (*req).Flags
 	(*resp).Flags.QR = true
@@ -99,7 +99,7 @@ func (resp *DNSResponse) writeDomainName(buf *bytes.Buffer, name string) {
 	buf.WriteByte(0) // End of domain name
 }
 
-func (resp *DNSResponse) writeAnswerRecord(buf *bytes.Buffer, ar DNSAnswer) {
+func (resp *DNSResponse) writeAnswerRecord(buf *bytes.Buffer, ar DnsAnswer) {
 	resp.writeDomainName(buf, ar.Name)
 	binary.Write(buf, binary.BigEndian, ar.Type)
 	binary.Write(buf, binary.BigEndian, ar.Class)
@@ -108,7 +108,7 @@ func (resp *DNSResponse) writeAnswerRecord(buf *bytes.Buffer, ar DNSAnswer) {
 	buf.Write(ar.RData)
 }
 
-func (resp *DNSResponse) writeResourceRecord(buf *bytes.Buffer, rr DNSResourceRecord) {
+func (resp *DNSResponse) writeResourceRecord(buf *bytes.Buffer, rr DnsResourceRecord) {
 	resp.writeDomainName(buf, rr.Name)
 	binary.Write(buf, binary.BigEndian, rr.Type)
 	binary.Write(buf, binary.BigEndian, rr.Class)

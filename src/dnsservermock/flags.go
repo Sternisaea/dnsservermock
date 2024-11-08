@@ -2,7 +2,7 @@ package dnsservermock
 
 import "github.com/sternisaea/dnsservermock/src/dnsconst"
 
-type DNSFlags struct {
+type DnsFlags struct {
 	QR     bool           // false = query, true = response
 	Opcode uint8          // Kind of query (4-bits)
 	AA     bool           // Authoritative Answer
@@ -15,7 +15,7 @@ type DNSFlags struct {
 	RCODE  dnsconst.Rcode // Reponse Code (4-bits)
 }
 
-func (df *DNSFlags) Set(flags uint16) {
+func (df *DnsFlags) Set(flags uint16) {
 	df.QR = (flags & 0x8000) != 0
 	df.Opcode = uint8((flags & 0x7800) >> 11)
 	df.AA = (flags & 0x0400) != 0
@@ -28,7 +28,7 @@ func (df *DNSFlags) Set(flags uint16) {
 	df.RCODE = dnsconst.Rcode(flags & 0x000F)
 }
 
-func (df *DNSFlags) Get() uint16 {
+func (df *DnsFlags) Get() uint16 {
 	var flags uint16
 	if df.QR {
 		flags |= 0x8000

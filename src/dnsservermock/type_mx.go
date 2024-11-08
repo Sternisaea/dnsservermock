@@ -10,7 +10,7 @@ import (
 type TypeMX struct {
 }
 
-func (t *TypeMX) Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, store dnsstorage.Storage) {
+func (t *TypeMX) Process(req *DnsRequest, resp *DNSResponse, qst DnsQuestion, store dnsstorage.Storage) {
 	result, err := store.Get(qst.Name, dnsconst.Type_MX)
 	if err != nil {
 		(*resp).Flags.RCODE = dnsconst.RcodeNXDomain

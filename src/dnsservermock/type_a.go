@@ -10,7 +10,7 @@ import (
 type TypeA struct {
 }
 
-func (t *TypeA) Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, store dnsstorage.Storage) {
+func (t *TypeA) Process(req *DnsRequest, resp *DNSResponse, qst DnsQuestion, store dnsstorage.Storage) {
 	result, err := store.Get(qst.Name, dnsconst.Type_A)
 	if err != nil {
 		(*resp).Flags.RCODE = dnsconst.RcodeNXDomain
@@ -23,7 +23,7 @@ func (t *TypeA) Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, sto
 		return
 	}
 
-	answer := DNSAnswer{
+	answer := DnsAnswer{
 		Name:     qst.Name,
 		Type:     qst.Type,
 		Class:    qst.Class,
