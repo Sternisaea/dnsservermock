@@ -37,7 +37,7 @@ const (
 	Type_ANY   DnsType = 255
 )
 
-type DnsClass int
+type DnsClass uint16
 
 const (
 	Class_IN DnsClass = 1
