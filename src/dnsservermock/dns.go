@@ -6,8 +6,8 @@ import (
 	"log"
 	"net"
 
+	"github.com/sternisaea/dnsservermock/src/dnsconst"
 	"github.com/sternisaea/dnsservermock/src/dnsstorage"
-	"github.com/sternisaea/dnsservermock/src/dnstypes"
 )
 
 type DNSServer struct {
@@ -74,22 +74,22 @@ func (ds *DNSServer) Stop() error {
 func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 	req := &DNSRequest{}
 	if err := req.ProcessRequestBuffer(buf, n); err != nil {
-		ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeFormErr, err)
+		ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeFormErr, err)
 		return
 	}
 
 	resp := NewDnsResponse()
 	resp.CopyHeaderAndQuestions(req)
 	for _, q := range req.Questions {
-		proc, err := GetProcess(dnstypes.DnsType(q.Type))
+		proc, err := GetProcess(dnsconst.DnsType(q.Type))
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrNotSupportedType):
-				ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeNotImp, err)
+				ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeNotImp, err)
 			case errors.Is(err, ErrUnknownType):
-				ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeFormErr, err)
+				ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeFormErr, err)
 			default:
-				ds.sendErrorResponse(req, clientAddr, dnstypes.RcodeServFail, err)
+				ds.sendErrorResponse(req, clientAddr, dnsconst.RcodeServFail, err)
 			}
 			return
 		}
@@ -103,7 +103,7 @@ func (ds *DNSServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 	log.Printf("DNS Response have been sent (ID: %04X)", resp.ID)
 }
 
-func (ds *DNSServer) sendErrorResponse(req *DNSRequest, clientAddr *net.UDPAddr, rcode dnstypes.Rcode, err error) {
+func (ds *DNSServer) sendErrorResponse(req *DNSRequest, clientAddr *net.UDPAddr, rcode dnsconst.Rcode, err error) {
 	log.Printf("DNS error (ID: %04X): %s", req.ID, err)
 
 	resp := &DNSResponse{}

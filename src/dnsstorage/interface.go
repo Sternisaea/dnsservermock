@@ -3,12 +3,12 @@ package dnsstorage
 import (
 	"errors"
 
-	"github.com/sternisaea/dnsservermock/src/dnstypes"
+	"github.com/sternisaea/dnsservermock/src/dnsconst"
 )
 
 type Storage interface {
-	Set(domain string, reqType dnstypes.DnsType, result string) error
-	Get(domain string, reqType dnstypes.DnsType) (string, error)
+	Set(domain string, reqType dnsconst.DnsType, result string) error
+	Get(domain string, reqType dnsconst.DnsType) (string, error)
 }
 
 var (

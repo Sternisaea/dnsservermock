@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sternisaea/dnsservermock/src/dnsconst"
 	"github.com/sternisaea/dnsservermock/src/dnsstorage"
-	"github.com/sternisaea/dnsservermock/src/dnstypes"
 )
 
 var (
@@ -17,67 +17,67 @@ type TypeProcess interface {
 	Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, store dnsstorage.Storage)
 }
 
-func GetProcess(dnsType dnstypes.DnsType) (TypeProcess, error) {
+func GetProcess(dnsType dnsconst.DnsType) (TypeProcess, error) {
 	switch dnsType {
-	case dnstypes.Type_A:
+	case dnsconst.Type_A:
 		return &TypeA{}, nil
-	case dnstypes.Type_NS:
+	case dnsconst.Type_NS:
 		return nil, fmt.Errorf("type %s (%d): %w", "NS", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MD:
+	case dnsconst.Type_MD:
 		return nil, fmt.Errorf("type %s (%d): %w", "MD", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MF:
+	case dnsconst.Type_MF:
 		return nil, fmt.Errorf("type %s (%d): %w", "MF", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_CNAME:
+	case dnsconst.Type_CNAME:
 		return nil, fmt.Errorf("type %s (%d): %w", "CNAME", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_SOA:
+	case dnsconst.Type_SOA:
 		return nil, fmt.Errorf("type %s (%d): %w", "SOA", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MB:
+	case dnsconst.Type_MB:
 		return nil, fmt.Errorf("type %s (%d): %w", "MB", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MG:
+	case dnsconst.Type_MG:
 		return nil, fmt.Errorf("type %s (%d): %w", "MG", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MR:
+	case dnsconst.Type_MR:
 		return nil, fmt.Errorf("type %s (%d): %w", "MR", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_NULL:
+	case dnsconst.Type_NULL:
 		return nil, fmt.Errorf("type %s (%d): %w", "NULL", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_WKS:
+	case dnsconst.Type_WKS:
 		return nil, fmt.Errorf("type %s (%d): %w", "WKS", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_PTR:
+	case dnsconst.Type_PTR:
 		return nil, fmt.Errorf("type %s (%d): %w", "PTR", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_HINFO:
+	case dnsconst.Type_HINFO:
 		return nil, fmt.Errorf("type %s (%d): %w", "HINFO", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MINFO:
+	case dnsconst.Type_MINFO:
 		return nil, fmt.Errorf("type %s (%d): %w", "MINFO", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MX:
+	case dnsconst.Type_MX:
 		return &TypeMX{}, nil
-	case dnstypes.Type_TXT:
+	case dnsconst.Type_TXT:
 		return nil, fmt.Errorf("type %s (%d): %w", "TXT", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_AAAA:
+	case dnsconst.Type_AAAA:
 		return nil, fmt.Errorf("type %s (%d): %w", "AAAA", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_SRV:
+	case dnsconst.Type_SRV:
 		return nil, fmt.Errorf("type %s (%d): %w", "SRV", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_NAPTR:
+	case dnsconst.Type_NAPTR:
 		return nil, fmt.Errorf("type %s (%d): %w", "NAPTR", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_OPT:
+	case dnsconst.Type_OPT:
 		return nil, fmt.Errorf("type %s (%d): %w", "OPT", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_DS:
+	case dnsconst.Type_DS:
 		return nil, fmt.Errorf("type %s (%d): %w", "DS", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_RRSIG:
+	case dnsconst.Type_RRSIG:
 		return nil, fmt.Errorf("type %s (%d): %w", "RRSIG", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_NSEC:
+	case dnsconst.Type_NSEC:
 		return nil, fmt.Errorf("type %s (%d): %w", "NSEC", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_DNSKEY:
+	case dnsconst.Type_DNSKEY:
 		return nil, fmt.Errorf("type %s (%d): %w", "DNSKEY", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_TLSA:
+	case dnsconst.Type_TLSA:
 		return nil, fmt.Errorf("type %s (%d): %w", "TLSA", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_SPF:
+	case dnsconst.Type_SPF:
 		return nil, fmt.Errorf("type %s (%d): %w", "SPF", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_AXFR:
+	case dnsconst.Type_AXFR:
 		return nil, fmt.Errorf("type %s (%d): %w", "AXFR", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MAILB:
+	case dnsconst.Type_MAILB:
 		return nil, fmt.Errorf("type %s (%d): %w", "MAILB", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_MAILA:
+	case dnsconst.Type_MAILA:
 		return nil, fmt.Errorf("type %s (%d): %w", "MAILA", dnsType, ErrNotSupportedType)
-	case dnstypes.Type_ANY:
+	case dnsconst.Type_ANY:
 		return nil, fmt.Errorf("type %s (%d): %w", "*", dnsType, ErrNotSupportedType)
 	}
 	return nil, fmt.Errorf("type %d: %w", dnsType, ErrUnknownType)

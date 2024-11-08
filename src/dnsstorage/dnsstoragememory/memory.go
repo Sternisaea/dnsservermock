@@ -1,8 +1,8 @@
 package dnsstoragememory
 
 import (
+	"github.com/sternisaea/dnsservermock/src/dnsconst"
 	"github.com/sternisaea/dnsservermock/src/dnsstorage"
-	"github.com/sternisaea/dnsservermock/src/dnstypes"
 )
 
 type MemoryStore struct {
@@ -13,7 +13,7 @@ func (ms *MemoryStore) initialiseDomains() {
 	(*ms).domains = make(map[string]resolutions)
 }
 
-type resolutions map[dnstypes.DnsType]string
+type resolutions map[dnsconst.DnsType]string
 
 func NewMemoryStore() *MemoryStore {
 	ms := &MemoryStore{}
@@ -21,20 +21,20 @@ func NewMemoryStore() *MemoryStore {
 	return ms
 }
 
-func (ms *MemoryStore) Set(domain string, reqType dnstypes.DnsType, result string) error {
+func (ms *MemoryStore) Set(domain string, reqType dnsconst.DnsType, result string) error {
 	if (*ms).domains == nil {
 		(*ms).initialiseDomains()
 	}
 	res, ok := (*ms).domains[domain]
 	if !ok {
-		res = make(map[dnstypes.DnsType]string)
+		res = make(map[dnsconst.DnsType]string)
 	}
 	res[reqType] = result
 	(*ms).domains[domain] = res
 	return nil
 }
 
-func (ms *MemoryStore) Get(domain string, reqType dnstypes.DnsType) (string, error) {
+func (ms *MemoryStore) Get(domain string, reqType dnsconst.DnsType) (string, error) {
 	if (*ms).domains == nil {
 		return "", dnsstorage.ErrDomainNotFound
 	}

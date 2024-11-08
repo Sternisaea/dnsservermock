@@ -3,23 +3,23 @@ package dnsservermock
 import (
 	"net"
 
+	"github.com/sternisaea/dnsservermock/src/dnsconst"
 	"github.com/sternisaea/dnsservermock/src/dnsstorage"
-	"github.com/sternisaea/dnsservermock/src/dnstypes"
 )
 
 type TypeA struct {
 }
 
 func (t *TypeA) Process(req *DNSRequest, resp *DNSResponse, qst DNSQuestion, store dnsstorage.Storage) {
-	result, err := store.Get(qst.Name, dnstypes.Type_A)
+	result, err := store.Get(qst.Name, dnsconst.Type_A)
 	if err != nil {
-		(*resp).Flags.RCODE = dnstypes.RcodeNXDomain
+		(*resp).Flags.RCODE = dnsconst.RcodeNXDomain
 		return
 	}
 
 	ip4 := net.ParseIP(result).To4()
 	if ip4 == nil || len(ip4) != 4 {
-		(*resp).Flags.RCODE = dnstypes.RcodeServFail
+		(*resp).Flags.RCODE = dnsconst.RcodeServFail
 		return
 	}
 

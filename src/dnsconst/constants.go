@@ -1,4 +1,4 @@
-package dnstypes
+package dnsconst
 
 type DnsType uint16
 
