@@ -10,7 +10,7 @@ var (
 	ErrBufferTooShort = fmt.Errorf("buffer too short")
 )
 
-type DnsRequest struct {
+type DnsQuery struct {
 	ID        uint16
 	Flags     DnsFlags
 	QDCount   uint16
@@ -37,7 +37,7 @@ type DnsResourceRecord struct {
 	RData    []byte
 }
 
-func (d *DnsRequest) ProcessRequestBuffer(buf []byte, length int) error {
+func (d *DnsQuery) ProcessRequestBuffer(buf []byte, length int) error {
 	if length < 12 {
 		return fmt.Errorf("dns request: %w", ErrBufferTooShort)
 	}
@@ -89,7 +89,7 @@ func parseDNSName(buf []byte, offset int) (string, int, error) {
 			break
 		}
 		// RFC 1035 - 4.1.4. Message compression
-		if length&0xC0 == 0xC0 { // 2 most significant bits (11) indicates pointer offset
+		if length&0xC0 == 0xC0 { // 2 most significant bits (11) indicate pointer offset
 			if offset+1 >= len(buf) {
 				return "", offset, fmt.Errorf("name: %w", ErrBufferTooShort)
 			}
