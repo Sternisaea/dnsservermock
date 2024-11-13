@@ -30,8 +30,12 @@ func NewDnsResponse(id uint16) *DnsResponse {
 }
 
 func (resp *DnsResponse) Write() []byte {
-	dms := make(domains, len(resp.Answers))
+	(*resp).writePass()        // First pass to fill length fields
+	return (*resp).writePass() // Second pass with full data
+}
 
+func (resp *DnsResponse) writePass() []byte {
+	dms := make(domains, len(resp.Answers))
 	var buf bytes.Buffer
 
 	binary.Write(&buf, binary.BigEndian, resp.ID)
@@ -62,15 +66,5 @@ func (resp *DnsResponse) Write() []byte {
 	// for _, rr := range resp.Additionals {
 	// 	writeResourceRecord(&buf, rr)
 	// }
-
 	return buf.Bytes()
 }
-
-// func (resp *DNSResponse) CopyHeaderAndQuestions(req *DnsQuery) {
-// 	(*resp).ID = (*req).ID
-// 	(*resp).Flags = (*req).Flags
-// 	(*resp).Flags.QR = true
-// 	(*resp).Flags.RA = false
-// 	(*resp).QDCount = (*req).QDCount
-// 	(*resp).Questions = append((*resp).Questions, (*req).Questions...)
-// }
