@@ -74,8 +74,7 @@ func (ds *DnsServer) handleRequest(buf []byte, n int, clientAddr *net.UDPAddr) {
 		log.Println(err)
 	}
 
-	_, err := ds.conn.WriteToUDP((*dh).GetOutput(), clientAddr)
-	if err != nil {
+	if err := ds.writeResponse(dh, clientAddr); err != nil {
 		log.Printf("Error sending DNS response (ID: %04x): %s", (*dh).ID, err)
 	}
 	log.Printf("DNS response was succesfully sent (ID: %04x)", (*dh).ID)
@@ -94,26 +93,14 @@ func (ds *DnsServer) processRequest(dh *DnsHandling, buf []byte, n int) error {
 	return nil
 }
 
-func printbuffer(buf []byte) {
-	fmt.Println("Buffer:")
-	chrs := ""
-	for i, b := range buf {
-		if i != 0 && i%16 == 0 {
-			if len(chrs) != 0 {
-				fmt.Printf("%s", chrs)
-			}
-			fmt.Println()
-			chrs = ""
-		}
-
-		// if (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b == '-' {
-		if b >= ' ' && b <= '~' {
-			chrs += string(b)
-		} else {
-			chrs += "."
-		}
-
-		fmt.Printf("%02x ", b)
+func (ds *DnsServer) writeResponse(dh *DnsHandling, clientAddr *net.UDPAddr) error {
+	if err := dh.WriteResponse(); err != nil {
+		return err
 	}
-	fmt.Println()
+
+	_, err := ds.conn.WriteToUDP((*dh).GetOutput(), clientAddr)
+	if err != nil {
+		return err
+	}
+	return nil
 }
