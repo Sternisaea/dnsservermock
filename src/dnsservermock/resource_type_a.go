@@ -2,7 +2,6 @@ package dnsservermock
 
 import (
 	"bytes"
-	"encoding/binary"
 	"net"
 
 	"github.com/sternisaea/dnsservermock/src/dnsconst"
@@ -33,6 +32,7 @@ func (r *ResourceTypeA) Query(store dnsstorage.Storage) (dnsconst.Rcode, error) 
 
 func (r *ResourceTypeA) Write(buf *bytes.Buffer, dms *domains) {
 	(*r).Base.Write(buf, dms)
-	binary.Write(buf, binary.BigEndian, uint16(len((*r).Address)))
+	b := buf.Len()
 	buf.Write((*r).Address)
+	(*r).Base.RDLength = uint16(buf.Len() - b)
 }

@@ -30,6 +30,8 @@ func (r *ResourceTypeMX) Query(store dnsstorage.Storage) (dnsconst.Rcode, error)
 
 func (r *ResourceTypeMX) Write(buf *bytes.Buffer, dms *domains) {
 	(*r).Base.Write(buf, dms)
+	b := buf.Len()
 	binary.Write(buf, binary.BigEndian, (*r).Preference)
 	writeDomainName(buf, dms, (*r).Exchange)
+	(*r).Base.RDLength = uint16(buf.Len() - b)
 }
