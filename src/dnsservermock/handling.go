@@ -68,6 +68,9 @@ func (dh *DnsHandling) ExecuteQueries(store dnsstorage.Storage) error {
 
 func (dh *DnsHandling) WriteResponse() error {
 	(*dh).output = (*dh).response.Write()
+	if len((*dh).output) == 0 {
+		return errors.New("empty reponse output")
+	}
 	return nil
 }
 
