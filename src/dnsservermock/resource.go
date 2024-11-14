@@ -59,7 +59,7 @@ func GetResource(qst DnsQuestion) (DnsResource, error) {
 	case dnsconst.Type_TXT:
 		return nil, fmt.Errorf("type %s (%d): %w", "TXT", dtype, ErrNotSupportedType)
 	case dnsconst.Type_AAAA:
-		return nil, fmt.Errorf("type %s (%d): %w", "AAAA", dtype, ErrNotSupportedType)
+		return NewResourceTypeAAAA(base), nil
 	case dnsconst.Type_SRV:
 		return nil, fmt.Errorf("type %s (%d): %w", "SRV", dtype, ErrNotSupportedType)
 	case dnsconst.Type_NAPTR:
