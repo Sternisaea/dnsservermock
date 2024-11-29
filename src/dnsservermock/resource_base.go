@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/sternisaea/dnsservermock/src/dnsconst"
+	"github.com/Sternisaea/dnsservermock/src/dnsconst"
 )
 
 type ResourceBase struct {

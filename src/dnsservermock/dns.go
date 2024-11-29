@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/sternisaea/dnsservermock/src/dnsstorage"
+	"github.com/Sternisaea/dnsservermock/src/dnsstorage"
 )
 
 type DnsServer struct {

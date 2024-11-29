@@ -1,8 +1,8 @@
 package dnsstoragememory
 
 import (
-	"github.com/sternisaea/dnsservermock/src/dnsconst"
-	"github.com/sternisaea/dnsservermock/src/dnsstorage"
+	"github.com/Sternisaea/dnsservermock/src/dnsconst"
+	"github.com/Sternisaea/dnsservermock/src/dnsstorage"
 )
 
 type MemoryStore struct {

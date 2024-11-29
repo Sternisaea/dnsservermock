@@ -3,7 +3,7 @@ package dnsstorage
 import (
 	"errors"
 
-	"github.com/sternisaea/dnsservermock/src/dnsconst"
+	"github.com/Sternisaea/dnsservermock/src/dnsconst"
 )
 
 type Storage interface {

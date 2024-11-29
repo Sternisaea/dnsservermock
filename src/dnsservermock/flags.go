@@ -1,6 +1,6 @@
 package dnsservermock
 
-import "github.com/sternisaea/dnsservermock/src/dnsconst"
+import "github.com/Sternisaea/dnsservermock/src/dnsconst"
 
 type DnsFlags struct {
 	QR     bool           // false = query, true = response
