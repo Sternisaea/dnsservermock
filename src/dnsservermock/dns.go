@@ -39,7 +39,6 @@ func (ds *DnsServer) Start() error {
 
 	log.Printf("DNS server listening on %s UDP port %d", (*ds).ip, (*ds).port)
 	go func() {
-		defer (*ds).Stop()
 		for {
 			buf := make([]byte, 4096)
 			n, clientAddr, err := (*ds).conn.ReadFromUDP(buf)
